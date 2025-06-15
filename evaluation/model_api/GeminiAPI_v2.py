@@ -35,7 +35,8 @@ class GeminiAPI(BaseAPI):
             api_key="YOUR_KEY",
         )
 
-        self.generation_config.setdefault("temperature", 1.0)
+        if "temperature" not in self.generation_config:
+            self.generation_config["temperature"] = 1.0
         
         self.sys_prompt = self.without_strict_jsonformat_sys_prompt
 
@@ -123,7 +124,8 @@ class GeminiAPI(BaseAPI):
         return False
 
     def response(self, messages, tools=None):
-        tools = tools or []
+        if not tools:
+            tools = None
         for _ in range(10):
             try:
                 completion = self.client.chat.completions.create(
@@ -132,15 +134,15 @@ class GeminiAPI(BaseAPI):
                     tools=tools,
                     **self.generation_config
                 )
-                if completion and completion.choices:
-                    return completion
+                if completion is None or completion.choices is None:
+                    continue
+                return completion
                 
             except Exception as e:
                 print(f"[Retry Error]: {e}")
                 time.sleep(1)
 
     def generate_response(self, messages, tools=None):
-        tools = tools or []
         tool_call_id = None
         func_name = None
 
@@ -148,7 +150,7 @@ class GeminiAPI(BaseAPI):
             if "function_call" in message:
                 tool_call_id = ''.join(random.choices(string.ascii_letters + string.digits, k=9))
                 func_name = message["function_call"]["name"]
-                messages[i] = {
+                new_message = {
                     "role": "assistant",
                     "tool_calls": [
                         {
@@ -156,15 +158,18 @@ class GeminiAPI(BaseAPI):
                             "type": "function",
                             "function": message["function_call"],
                         }
-                    ]
+                    ],
                 }
+                messages[i] = new_message
+                
             elif message["role"] == "function":
-                messages[i] = {
+                new_message = {
                     "role": "tool",
                     "content": message["content"],
                     "tool_call_id": tool_call_id,
                     "name": func_name,
                 }
+                messages[i] = new_message
 
         completion = self.response(messages, tools)
         
@@ -173,14 +178,19 @@ class GeminiAPI(BaseAPI):
 
         msg = completion.choices[0].message
 
-        if msg.tool_calls:
-            tool_call = msg.tool_calls[0]
-            
+        if completion.choices[0].message.tool_calls is not None:
+            tool_call = completion.choices[0].message.tool_calls[0]
+            tool_call_id = tool_call.id
+            tool_name = tool_call.function.name
+            if tool_call.function.arguments:
+                arguments = json.loads(tool_call.function.arguments)
+            else:
+                arguments = {}
             return {
                 "type": "tool",
-                "tool_call_id": tool_call.id,
-                "tool_name": tool_call.function.name,
-                "arguments": json.loads(tool_call.function.arguments or "{}")
+                "tool_call_id": tool_call_id,
+                "tool_name": tool_name,
+                "arguments": arguments,
             }
 
         else:
