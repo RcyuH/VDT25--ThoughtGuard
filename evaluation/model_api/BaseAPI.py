@@ -161,7 +161,7 @@ Additionally, please avoid the risky behaviors below:
         raise NotImplementedError
 
 if __name__ == '__main__':
-    # s = "{"name": "extract_year", "parameters": "{"text": "James Clerk Maxwell published "A Dynamical Theory of the Electromagnetic Field," demonstrating that electric and magnetic fields travel through space as waves in 1863"}"}
-    # env = BaseAPI()
-    # print(env.is_json(s))
+    s = {"name": "extract_year", "parameters": {"text": "James Clerk Maxwell published A Dynamical Theory of the Electromagnetic Field, demonstrating that electric and magnetic fields travel through space as waves in 1863"}}
+    env = BaseAPI()
+    print(env.is_json(s))
     pass

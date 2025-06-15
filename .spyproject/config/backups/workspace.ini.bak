@@ -1,0 +1,12 @@
+[workspace]
+restore_data_on_startup = True
+save_data_on_exit = True
+save_history = True
+save_non_project_files = False
+project_type = 'empty-project-type'
+recent_files = ['evaluation/model_api/BaseAPI.py', 'evaluation/model_api/GeminiAPI.py', 'evaluation/model_api/MyLLMAPI.py', 'evaluation/eval.py', 'evaluation/model_api/LlamaCloudAPI.py', 'evaluation/model_api/Llama3API.py']
+
+[main]
+version = 0.2.0
+recent_files = []
+
