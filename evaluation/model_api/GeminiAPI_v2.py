@@ -36,6 +36,8 @@ class GeminiAPI(BaseAPI):
         )
 
         self.generation_config.setdefault("temperature", 1.0)
+        
+        self.sys_prompt = self.without_strict_jsonformat_sys_prompt
 
         self.has_aligner = aligner_path is not None
         if self.has_aligner:
