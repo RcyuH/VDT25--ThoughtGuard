@@ -126,7 +126,7 @@ class MyAgent_v1(BaseAPI):
 
         if self.rule_based_filter(aligned_thought):
             print("[Blocked] Unsafe content detected.")
-            return {"type": "text", "content": "[BLOCKED DUE TO UNSAFE CONTENT]"}
+            return {"type": "content", "content": "[BLOCKED DUE TO UNSAFE CONTENT]"}
 
         # Fake tool_call response
         if aligned_thought.startswith("CALL:"):
@@ -140,6 +140,6 @@ class MyAgent_v1(BaseAPI):
                     "arguments": parts.get("arguments", {}),
                 }
             except:
-                return {"type": "text", "content": aligned_thought}
+                return {"type": "content", "content": aligned_thought}
 
-        return {"type": "text", "content": aligned_thought}
+        return {"type": "content", "content": aligned_thought}
