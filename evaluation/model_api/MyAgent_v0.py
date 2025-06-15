@@ -41,9 +41,6 @@ class MyAgent_v0(BaseAPI):
 
         self.sys_prompt = self.without_strict_jsonformat_sys_prompt
 
-    def get_system_prompt(self, d=None):
-        return self.sys_prompt
-
     def preprocess_messages(self, messages):
         tool_call_id = None
         func_name = None

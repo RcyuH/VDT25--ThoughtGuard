@@ -208,6 +208,6 @@ class GeminiAPI(BaseAPI):
             # Step 3: Rule-based safety filter
             if self.rule_based_filter(aligned_thought):
                 print("[Filter] Output violates safety policy. Blocking...")
-                return {"type": "text", "content": "[BLOCKED FOR SAFETY]"}
+                return {"type": "content", "content": "[BLOCKED FOR SAFETY]"}
 
-            return {"type": "text", "content": aligned_thought}
+            return {"type": "content", "content": aligned_thought}

@@ -31,6 +31,8 @@ class MyAgent_v1(BaseAPI):
             device_map="auto"
         ).eval()
         self.max_rewrites = max_rewrites
+        
+        self.sys_prompt = self.without_strict_jsonformat_sys_prompt
 
         # Thought-Aligners
         self.aligners = []
