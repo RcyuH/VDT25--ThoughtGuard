@@ -20,12 +20,12 @@ from BaseAPI import BaseAPI
 
 
 class GeminiAPI(BaseAPI):
-    def __init__(self, model_name, generation_config={}, aligner_path=None):
+    def __init__(self, model_name="google/gemini-2.0-flash-001", generation_config={}, aligner_path=None):
         super().__init__(generation_config)
         self.model_name = model_name
         self.client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key="YOUR_KEY",
+            api_key="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",
         )
         if "temperature" not in self.generation_config:
             self.generation_config["temperature"] = 1.0
