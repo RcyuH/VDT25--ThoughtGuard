@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 16 14:13:24 2025
+Created on Mon Jun 16 14:31:13 2025
 
 @author: rcyuh
 """
@@ -81,4 +81,3 @@ class QwenAPI(BaseAPI):
         ## normal content part
         else:
             return {'type': 'content', 'content': completion}
-

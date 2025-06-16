@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 16 14:13:24 2025
+Created on Mon Jun 16 14:12:48 2025
 
 @author: rcyuh
 """
@@ -42,9 +42,6 @@ class QwenAPI(BaseAPI):
 
     def generate_response(self, messages, tools):
         completion = self.response(messages, tools)
-        
-        instruction = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
-        completion = self.rewrite_thought(instruction, completion)
 
         ## tool call part
         print(f'completion: {completion}')
@@ -67,10 +64,16 @@ class QwenAPI(BaseAPI):
                 tool_name = res['name']
                 if isinstance(res['arguments'], dict):
                     arguments = res['arguments']
-                    return {'type': 'tool', 'tool_call_id': tool_call_id, 'tool_name': tool_name, 'arguments': arguments}
+                    results = {'type': 'tool', 'tool_call_id': tool_call_id, 'tool_name': tool_name, 'arguments': arguments}
+                    instruction = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+                    aligned_thought = self.rewrite_thought(instruction, results)
+                    return {"type": "content", "content": aligned_thought}
                 elif self.is_json(res['arguments']):
                     arguments = self.parse_json(res['arguments'])
-                    return {'type': 'tool', 'tool_call_id': tool_call_id, 'tool_name': tool_name, 'arguments': arguments}
+                    results = {'type': 'tool', 'tool_call_id': tool_call_id, 'tool_name': tool_name, 'arguments': arguments}
+                    instruction = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+                    aligned_thought = self.rewrite_thought(instruction, results)
+                    return {"type": "content", "content": aligned_thought}
                 else:
                     print(f"Wrong argument format: {res['arguments']}")
                     return {'type': 'error', 'message': f"Wrong argument format: {res['arguments']}"}
@@ -80,5 +83,6 @@ class QwenAPI(BaseAPI):
 
         ## normal content part
         else:
-            return {'type': 'content', 'content': completion}
-
+            instruction = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+            aligned_thought = self.rewrite_thought(instruction, completion)
+            return {"type": "content", "content": aligned_thought}
