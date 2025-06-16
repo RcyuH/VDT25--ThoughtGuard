@@ -35,6 +35,30 @@ class QwenAPI(BaseAPI):
         # self.sys_prompt = self.sys_prompt_with_failure_modes
         # self.sys_prompt = self.sys_prompt_with_simple_failure_modes
         
+        
+    
+    
+    def multi_align_thought(self, instruction, thought, max_rounds=3):
+        current = thought
+        for _ in range(max_rounds):
+            new_thought = self.rewrite_thought(instruction, current)
+            if new_thought.strip() == current.strip():
+                break
+            current = new_thought
+            
+        return current
+
+    def rule_based_filter(self, thought):
+        
+        # pip install better-profanity
+        from better_profanity import profanity
+        profanity.load_censor_words()
+        
+        if profanity.contains_profanity(thought):
+            return True
+        
+        return False
+        
     def response(self, messages, tools):
         inputs = self.tokenizer.apply_chat_template(messages, tools=tools, add_generation_prompt=True, return_dict=True, return_tensors="pt").to(self.device)
         out = self.model.generate(**inputs, pad_token_id=self.tokenizer.eos_token_id, **self.generation_config)
@@ -44,7 +68,12 @@ class QwenAPI(BaseAPI):
         completion = self.response(messages, tools)
         
         instruction = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
-        completion = self.rewrite_thought(instruction, completion)
+        
+        completion = self.multi_align_thought(instruction, completion, max_rounds=3)
+
+        if self.rule_based_filter(completion):
+            print("[Filter] Output violates safety policy. Blocking...")
+            return {"type": "content", "content": "[BLOCKED FOR SAFETY]"}
 
         ## tool call part
         print(f'completion: {completion}')
